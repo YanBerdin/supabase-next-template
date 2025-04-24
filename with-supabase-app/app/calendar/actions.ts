@@ -165,7 +165,7 @@ export async function deleteEvent(id: string): Promise<boolean> {
   return true
 }
 
-export async function getTeams(): Promise<Team[]> {
+export async function getTeams(): Promise<{ id: string; name: string }[]> {
   const supabase = await createClient()
   const { data, error } = await supabase.from("teams").select("*").order("name", { ascending: true })
 
