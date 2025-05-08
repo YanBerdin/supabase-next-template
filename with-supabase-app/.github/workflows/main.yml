@@ -12,7 +12,10 @@ jobs:
     steps:
       - name: Send HTTP request
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ env.SUPABASE_KEY }}
         run: |
           curl -X GET "$SUPABASE_URL" -H "apikey: $SUPABASE_KEY"
+
+
+
