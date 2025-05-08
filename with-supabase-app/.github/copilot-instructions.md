@@ -1,6 +1,6 @@
 # **Project Requirements Document: « Réveil Basket Is sur Tille » Website**
 
-Contexte : Le club de basket souhaite moderniser sa présence en ligne et valoriser son histoire, ses équipes ainsi que ses valeurs. Les éléments graphiques (logo, palette de couleurs) seront extraits de leur page Facebook (lien fourni).
+Contexte : Le club de basket souhaite moderniser sa présence en ligne et valoriser son histoire, ses équipes ainsi que ses valeurs. Les éléments graphiques (logo, palette de couleurs) seront extraits de leurs réseaux sociaux (lien fourni).
 
 ## Fonctionnalités à Développer :
 
@@ -83,7 +83,6 @@ La base de données comprend les tables suivantes :
 2. Si la connexion échoue, vous verrez un message d'erreur avec des détails sur le problème.
 
 
-
 3. **Explorez les données** :
 
 1. La page affiche les équipes, les événements et les actualités récupérés de Supabase.
@@ -91,10 +90,10 @@ La base de données comprend les tables suivantes :
 
 
 
-4. **Testez à nouveau** : Vous pouvez cliquer sur le bouton "Tester à nouveau" pour rafraîchir les données.
+4. **Tester à nouveau** : Vous pouvez cliquer sur le bouton "Tester à nouveau" pour rafraîchir les données.
 
 
-Cette page vous permet de vérifier que :
+Cette page permet de vérifier que :
 
 - La connexion à Supabase fonctionne correctement
 - Les variables d'environnement sont bien configurées
@@ -104,7 +103,7 @@ Cette page vous permet de vérifier que :
 
 1. **Détection spécifique des tables manquantes** :
 
-2. Le code détecte maintenant si l'erreur est due à des tables manquantes dans la base de données
+2. Le code détecte si l'erreur est due à des tables manquantes dans la base de données
 3. Un nouvel état "tables-missing" a été ajouté pour ce cas spécifique
 
 

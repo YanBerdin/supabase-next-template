@@ -55,17 +55,18 @@ export default function TestConnectionPage() {
 
       // Test spécifique pour vérifier si les tables du projet existent
       try {
-        const { data, error } = await supabase.from("teams").select("count")
+        // Vérification de l'existence de la table teams sans stocker le résultat inutilisé
+        const { error: tableError } = await supabase.from("teams").select("count")
 
-        if (error) {
+        if (tableError) {
           // Si l'erreur contient "relation does not exist", les tables n'ont pas été créées
-          if (error.message && error.message.includes("relation") && error.message.includes("does not exist")) {
+          if (tableError.message && tableError.message.includes("relation") && tableError.message.includes("does not exist")) {
             setConnectionStatus("tables-missing")
             setErrorMessage("Les tables nécessaires n'ont pas été créées dans la base de données Supabase.")
             setIsLoading(false)
             return
           } else {
-            throw error
+            throw tableError
           }
         }
 
@@ -78,7 +79,7 @@ export default function TestConnectionPage() {
 
         setTeams(teamsData)
         setEvents(eventsData)
-        setNews(newsData.slice(0, 6)) // Limite à 5 actualités
+        setNews(newsData.slice(0, 6)) // Limite à 6 actualités
         setConnectionStatus("success")
       } catch (tableError) {
         // Vérifier si l'erreur est liée à l'absence de tables

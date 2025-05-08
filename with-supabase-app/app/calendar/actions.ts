@@ -36,9 +36,11 @@ export type News = {
   published_at: string
   author_id?: string
   created_at?: string
+  description?: string
+  image?: string
+  date?: string
 }
 
-// Fonction serveur pour récupérer les événements depuis Supabase
 export async function getEvents(): Promise<Event[]> {
   const supabase = await createClient()
   const { data, error } = await supabase.from("events").select("*").order("start_time", { ascending: true })
@@ -165,7 +167,7 @@ export async function deleteEvent(id: string): Promise<boolean> {
   return true
 }
 
-export async function getTeams(): Promise<{ id: string; name: string }[]> {
+export async function getTeams(): Promise<Team[]> {
   const supabase = await createClient()
   const { data, error } = await supabase.from("teams").select("*").order("name", { ascending: true })
 
@@ -233,7 +235,12 @@ export async function getNews(): Promise<News[]> {
     return []
   }
 
-  return data as News[]
+  return data ? data.map(item => ({
+    ...item,
+    description: item.summary,
+    image: item.image_url,
+    date: new Date(item.published_at).toLocaleDateString('fr-FR')
+  })) : []
 }
 
 export async function getNewsById(id: string): Promise<News | null> {
