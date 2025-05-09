@@ -32,7 +32,7 @@ export default function AboutPage() {
   ]
 
   return (
-    <main className="py-12 px-4">
+    
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Qui sommes-nous ?</h1>
 
@@ -172,6 +172,6 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
-    </main>
+      
   )
 }

@@ -3,10 +3,13 @@ import { EnvVarWarning } from "@/components/env-var-warning";
 import HeaderAuth from "@/components/header-auth";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { Geist } from "next/font/google";
+//import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
+
+import { Inter } from "next/font/google"
+//import { cn } from "@/lib/utils"
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -14,24 +17,30 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Réveil Basket Is sur Tille",
+  description: "Site officiel du club de basket d'Is sur Tille",
 };
 
+//const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], display: "swap" })
+
+/*
 const geistSans = Geist({
   display: "swap",
   subsets: ["latin"],
 });
-
+*/
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={geistSans.className} suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
+      {/*<html lang="fr" className={geistSans.className} suppressHydrationWarning>*/}
+
       {/*<body className="bg-background text-foreground">*/}
-      <body>
+      <body className={ inter.className }>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -43,10 +52,11 @@ export default function RootLayout({
               <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
                 <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
-                    <Link href={"/"}>Next.js Supabase Starter</Link>
+                    {/*<Link href={"/"}>Next.js Supabase Starter</Link>
                     <div className="flex items-center gap-2">
                       <DeployButton />
                     </div>
+                    */}
                   </div>
                   {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                 </div>
