@@ -1,4 +1,4 @@
-/*
+
 "use client"
 
 import { useEffect, useState, useRef } from "react"
@@ -7,24 +7,23 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
-import { FileText, Loader2 } from "lucide-react"
-import { getUserProfile, updateUserProfile, type Profile } from "@/lib/database"
+import { FileText } from "lucide-react"
+import { getUserProfile, type Profile } from "@/lib/database"
 
 export default function MemberAreaPage() {
   const router = useRouter()
   const { toast } = useToast()
   const isMounted = useRef(true)
-  
+
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSigningOut, setIsSigningOut] = useState(false)
 
   // Pour éviter les erreurs TypeScript avec les valeurs potentiellement nulles
   const displayName = userProfile?.first_name || user?.email?.split("@")[0] || "Membre"
 
 
-    // Effet pour gérer le montage/démontage du composant
+  // Effet pour gérer le montage/démontage du composant
   useEffect(() => {
     return () => {
       isMounted.current = false
@@ -35,21 +34,25 @@ export default function MemberAreaPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const currentUser = await getUserProfile()
-        
+        // Récupérer l'utilisateur actuel via l'API
+        const response = await fetch('/api/auth/me')
+        const { data: { user: currentUser } } = await response.json()
+
         if (!currentUser) {
           router.push('/sign-in')
           return
         }
-        
+
         if (isMounted.current) {
           setUser(currentUser)
         }
+
+        // Récupérer le profil de l'utilisateur avec son ID
+        // Comme getUserProfile attend un ID, nous l'appelons avec l'ID de l'utilisateur courant
+        const profile = await fetch(`/api/profile?userId=${currentUser.id}`).then(res => res.json())
         
-        // Récupérer le profil de l'utilisateur
-        const profile = await getUserProfile(currentUser.id)
-        if (isMounted.current) {
-          setUserProfile(profile)
+        if (isMounted.current && profile) {
+          setUserProfile(profile.data)
         }
       } catch (error) {
         console.error("Erreur lors de la récupération de l'utilisateur:", error)
@@ -66,16 +69,23 @@ export default function MemberAreaPage() {
     }
 
     fetchUserData()
-  }, [router])
-    
+  }, [router, toast])
+
+
 
   // Afficher un état de chargement pendant la vérification de l'authentification
 
   return (
-    <main className="py-12 px-4">
+    <>
+    {isLoading ? (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        <span className="ml-2">Chargement...</span>
+      </div>
+    ) : (
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <h1 className="text-4xl font-bold">Bienvenue, {displayName}</h1>
+          <h2 className="text-4xl font-bold">Bienvenue, {displayName}</h2>
 
 
         <Tabs defaultValue="dashboard">
@@ -346,7 +356,10 @@ export default function MemberAreaPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </main>
+    </div>
+    )}
+    </>
   )
 }
-*/
+
+

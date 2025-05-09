@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CheckCircle, XCircle, RefreshCw, Database } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SupabaseClient } from '@supabase/supabase-js'
 
 // Composants d'alerte temporaires (fallback)
 const Alert = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
@@ -34,23 +35,56 @@ export default function TestConnectionPage() {
 
   const supabase = createClient()
 
+  // Fonction utilitaire pour tester la connexion de plusieurs façons
+  const checkSupabaseConnection = async (client: SupabaseClient) => {
+    try {
+      // Méthode 1: Utiliser la fonction RPC personnalisée
+      const { error: rpcError } = await client.rpc('get_current_timestamp')
+      
+      if (!rpcError) {
+        return { connected: true }
+      }
+      
+      // Méthode 2: Si la RPC échoue, essayer avec health check
+      const { error: healthError } = await client.from('pg_stat_statements').select('query').limit(1)
+      
+      if (!healthError || (healthError && healthError.message.includes("permission denied"))) {
+        // Si nous obtenons une erreur de permission, cela signifie que la connexion fonctionne
+        // mais l'utilisateur n'a pas accès à cette table (ce qui est normal)
+        return { connected: true }
+      }
+      
+      // Méthode 3: Dernière tentative avec le système d'authentification
+      const { error: authError } = await client.auth.getSession()
+      
+      if (!authError) {
+        return { connected: true }
+      }
+      
+      // Si toutes les méthodes échouent, retourner l'erreur la plus pertinente
+      return { 
+        connected: false, 
+        error: rpcError?.message || healthError?.message || authError?.message 
+      }
+    } catch (error) {
+      return { 
+        connected: false, 
+        error: error instanceof Error ? error.message : "Erreur inconnue" 
+      }
+    }
+  }
+
   const testConnection = async () => {
     setIsLoading(true)
     setConnectionStatus("loading")
     setErrorMessage("")
 
     try {
-      // Test simple de connexion à Supabase en vérifiant l'heure actuelle
-      const { error: connectionError } = await supabase.from("_realtime").select("*").limit(1)
-
-      // Si cette requête échoue pour des raisons autres que "relation does not exist",
-      // alors c'est un problème de connexion général
-      if (
-        connectionError &&
-        !connectionError.message.includes("relation") &&
-        !connectionError.message.includes("does not exist")
-      ) {
-        throw connectionError
+      // Test de connexion fiable
+      const connectionTest = await checkSupabaseConnection(supabase)
+      
+      if (!connectionTest.connected) {
+        throw new Error(connectionTest.error || "Impossible de se connecter à Supabase")
       }
 
       // Test spécifique pour vérifier si les tables du projet existent
