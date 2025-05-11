@@ -129,6 +129,22 @@ export const resetPasswordAction = async (formData: FormData) => {
 
 export const signOutAction = async () => {
   const supabase = await createClient();
-  await supabase.auth.signOut();
-  return redirect("/sign-in");
+  
+  try {
+    // Déconnexion avec options pour effacer tous les tokens
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
+    
+    if (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+    
+    // Ajout d'un petit délai pour s'assurer que la déconnexion est traitée
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Redirection vers la page de connexion
+    return redirect("/sign-in");
+  } catch (e) {
+    console.error("Exception lors de la déconnexion:", e);
+    return redirect("/sign-in");
+  }
 };

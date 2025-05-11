@@ -34,9 +34,16 @@ export default function MemberAreaPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Récupérer l'utilisateur actuel via l'API
-        const response = await fetch('/api/auth/me')
-        const { data: { user: currentUser } } = await response.json()
+        // Ajout d'un timeout pour éviter un blocage indéfini
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Délai d'attente dépassé")), 10000)
+        );
+        
+        // Récupérer l'utilisateur actuel via l'API avec gestion de timeout
+        const fetchUserPromise = fetch('/api/auth/me');
+        const response = await Promise.race([fetchUserPromise, timeoutPromise]) as Response;
+        const responseData = await response.json();
+        const currentUser = responseData.data?.user;
 
         if (!currentUser) {
           router.push('/sign-in')
@@ -47,9 +54,10 @@ export default function MemberAreaPage() {
           setUser(currentUser)
         }
 
-        // Récupérer le profil de l'utilisateur avec son ID
-        // Comme getUserProfile attend un ID, nous l'appelons avec l'ID de l'utilisateur courant
-        const profile = await fetch(`/api/profile?userId=${currentUser.id}`).then(res => res.json())
+        // Récupérer le profil de l'utilisateur avec son ID et gestion de timeout
+        const fetchProfilePromise = fetch(`/api/profile?userId=${currentUser.id}`);
+        const profileResponse = await Promise.race([fetchProfilePromise, timeoutPromise]) as Response;
+        const profile = await profileResponse.json();
         
         if (isMounted.current && profile) {
           setUserProfile(profile.data)
