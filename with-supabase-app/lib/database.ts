@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 //import { SupabaseClient } from '@supabase/supabase-js'
 
-// Type pour le profil utilisateur
 export type Profile = {
   id: string
   first_name: string | null
@@ -10,14 +9,13 @@ export type Profile = {
   created_at: string
 }
 
-// Fonction pour vérifier la connexion à Supabase
 async function checkSupabaseConnection() {
   try {
     const supabase = await createClient()
     const { error } = await supabase.from('_realtime').select('*').limit(1)
     
-    // Si cette requête échoue pour des raisons autres que "relation does not exist",
-    // alors c'est un problème de connexion général
+    // If Request fails for any other reason than "relation does not exist", it indicates a connection issue.
+    // If the error message contains "relation does not exist", it means the table is not present, which is expected if the database is empty or not initialized.
     if (
       error &&
       !error.message.includes("relation") &&
@@ -33,14 +31,13 @@ async function checkSupabaseConnection() {
   }
 }
 
-// Fonction pour récupérer le profil d'un utilisateur
 export async function getUserProfile(userId: string) {
   try {
-    // Vérifier d'abord si la connexion à Supabase fonctionne
+    // Check if we can connect to Supabase before proceeding
     const isConnected = await checkSupabaseConnection()
     if (!isConnected) {
       console.error("Impossible de se connecter à Supabase")
-      // Retourner un profil par défaut en cas d'échec de connexion
+      // Return a default profile to avoid blocking the interface
       return {
         id: userId,
         first_name: null,
@@ -51,12 +48,12 @@ export async function getUserProfile(userId: string) {
     }
 
     const supabase = await createClient()
-    // Dans votre structure, l'id du profil est le même que l'id de l'utilisateur
+    // Profile ID is the same as the user ID in this case
     const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single()
 
     if (error) {
       console.error(`Error fetching profile for user ${userId}:`, error)
-      // Retourner un profil par défaut en cas d'erreur
+      // Return a default profile to avoid blocking the interface
       return {
         id: userId,
         first_name: null,
@@ -69,7 +66,7 @@ export async function getUserProfile(userId: string) {
     return data as Profile
   } catch (error) {
     console.error("Error in getUserProfile:", error)
-    // Retourner un profil par défaut en cas d'exception
+    // Return a default profile to avoid blocking the interface
     return {
       id: userId,
       first_name: null,
@@ -80,7 +77,6 @@ export async function getUserProfile(userId: string) {
   }
 }
 
-// Fonction pour mettre à jour le profil d'un utilisateur
 export async function updateUserProfile(userId: string, profileData: Partial<Profile>) {
   try {
     const supabase = await createClient()
@@ -98,11 +94,10 @@ export async function updateUserProfile(userId: string, profileData: Partial<Pro
   }
 }
 
-// Fonction pour inspecter la structure de la table profiles
 export async function inspectProfilesTable() {
   try {
     const supabase = await createClient()
-    // Récupérer un échantillon de la table profiles
+    // Get a sample of profiles to inspect the structure
     const { data, error } = await supabase.from("profiles").select("*").limit(5)
     console.log("Data fetched:", data, error)
     
@@ -111,7 +106,7 @@ export async function inspectProfilesTable() {
       throw error
     }
 
-    // Si nous avons des données, extraire la structure
+    // If data is not empty, extract columns and a sample profile
     if (data && data.length > 0) {
       const sampleProfile = data[0]
       const columns = Object.keys(sampleProfile)
