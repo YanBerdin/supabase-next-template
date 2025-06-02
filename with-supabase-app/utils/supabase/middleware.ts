@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { isValidRedirectUrl } from "@/utils/validation";
 
 export const updateSession = async (request: NextRequest) => {
   // This `try/catch` block is only here for the interactive tutorial.
@@ -39,9 +40,21 @@ export const updateSession = async (request: NextRequest) => {
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
 
+    // Check if the request includes a redirect parameter
+    const redirectParam = request.nextUrl.searchParams.get("redirect_to");
+    if (redirectParam && !isValidRedirectUrl(redirectParam)) {
+      // Si une redirection non autorisée est demandée, on redirige vers la page d'accueil
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
     // protected routes
     if (request.nextUrl.pathname.startsWith("/protected") && user.error) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      const signInUrl = new URL("/sign-in", request.url);
+      // Préserver la redirection d'origine si elle est sûre
+      if (redirectParam && isValidRedirectUrl(redirectParam)) {
+        signInUrl.searchParams.set("redirect_to", redirectParam);
+      }
+      return NextResponse.redirect(signInUrl);
     }
 
     if (request.nextUrl.pathname === "/" && !user.error) {
