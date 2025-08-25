@@ -27,6 +27,8 @@ export const signUpAction = async (formData: FormData) => {
     },
   });
 
+// console.log(email, password); //TODO: remove
+
   if (error) {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
@@ -48,6 +50,8 @@ export const signInAction = async (formData: FormData) => {
     email,
     password,
   });
+
+// console.log(email, password); //TODO: remove
 
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);

@@ -1,0 +1,5 @@
+# Routes
+
+/test-connection
+
+/protected

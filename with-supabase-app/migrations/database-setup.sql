@@ -397,25 +397,30 @@ USING (
 
 
 -- Fonction pour créer automatiquement un profil lors de l'inscription d'un utilisateur
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (user_id, first_name, last_name, role)
-  VALUES (
-    NEW.id,
-    NEW.raw_user_meta_data->>'first_name',
-    NEW.raw_user_meta_data->>'last_name',
-    COALESCE(NEW.raw_user_meta_data->>'role', 'member')
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  insert into public.profiles (user_id, first_name, last_name, role)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'first_name',
+    new.raw_user_meta_data->>'last_name',
+    coalesce(new.raw_user_meta_data->>'role', 'member')
   );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  return new;
+end;
+$$;
 
 -- Trigger pour appeler la fonction lors de l'insertion d'un nouvel utilisateur
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+-- (Supprime d'abord le trigger s'il existe)
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
 
 -- Fonction pour supprimer le profil lors de la suppression d'un utilisateur
 CREATE OR REPLACE FUNCTION public.handle_user_deletion()

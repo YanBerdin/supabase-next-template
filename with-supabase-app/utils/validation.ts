@@ -9,6 +9,6 @@ export function isValidRedirectUrl(url: string): boolean {
   if (url.includes('//')) return false;
   
   // Whitelist
-  const allowedPaths = ['/protected', '/teams', '/news', '/calendar', '/about', '/contact'];
+  const allowedPaths = ['/protected', '/teams', '/news', '/calendar', '/about', '/contact', '/sign-up', '/sign-in'];
   return allowedPaths.some(path => url.startsWith(path));
 }
